@@ -1,0 +1,114 @@
+# **J-PEP Demo: Run the Full Pipeline on Example Data**
+vignette: >
+  %\VignetteIndexEntry{J-PEP Demo}
+  %\VignetteEngine{rmarkdown::html_vignette}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(jpepR)
+library(data.table)
+library(glue)
+library(RSQLite)
+library(DBI)
+library(igraph)
+library(clue)
+```
+
+## **Introduction**
+
+The `jpepR` package implements the J-PEP (Joint Pleiotropic and Epigenomic Partitioning) method. It provides tools to:
+
+- Fine-map GWAS traits and store SNP-level posterior inclusion probabilities (PIPs)
+
+- Construct SNP-to-trait ($V_{\text{trait}}$) and SNP-to-tissue ($V_{\text{tissue}}$) matrices
+
+- Run a Bayesian non-negative matrix factorization to decompose SNPs into interpretable biological clusters
+
+- Output matrices of SNP ($W$), trait ($H_{\text{trait}}$), and tissue ($H_{\text{tissue}}$) loadings
+
+The pipeline is modular and includes the following key functions:
+
+| Function              |   Description                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------|
+| `finemap_to_sqlite()` |   Fine-maps one trait using P-values and LD blocks                                    |
+| `make_vtrait()`       |   Builds the $V_{\text{trait}}$ matrix from focal + auxiliary traits                  |
+| `make_vtissue()`      |   Builds the $V_{\text{tissue}}$ matrix from epigenomic tracks                        |
+| `intersect_vmatrices()` |   Intersects SNPs shared between $V_{\text{trait}}$ and $V_{\text{tissue}}$         |
+| `run_jpep_model()`    |   Runs the J-PEP matrix factorization                                                 |
+| `save_jpep_results()` |   Saves $W$, $H_{\text{trait}}$, and $H_{\text{tissue}}$ matrices to disk             |
+
+## **Load and Prepare Example Data**
+
+### Load bundled test data
+```{r, eval = FALSE}
+data(focal_sumstats)
+data(auxiliary_01); data(auxiliary_02); data(auxiliary_03)
+data(auxiliary_04); data(auxiliary_05)
+data(ld_blocks)
+
+data(exons)
+data(epimap_tracks)
+data(bckg_epi)
+data(epimap_metadata)
+data(epimap_sampleID)
+```
+### Set up working directories
+```{r, eval = FALSE}
+work_dir <- file.path(tempdir(), "jpep_test")
+sumstats_dir <- file.path(work_dir, "sumstats")
+epi_dir <- file.path(work_dir, "epimap")
+output_dir <- file.path(work_dir, "output")
+
+dir.create(sumstats_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(epi_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(output_dir, recursive = TRUE)
+```
+
+## **Save Summary Statistics and Support Files**
+
+### Save summary statistics
+```{r, eval = FALSE}
+fwrite(focal_sumstats, file.path(sumstats_dir, "focal_sumstats.gz"), sep = "\t")
+for (i in 1:5) {
+  aux_data <- get(glue("auxiliary_0{i}"))
+  fwrite(aux_data, file.path(sumstats_dir, glue("auxiliary_0{i}_sumstats.gz")), sep = "\t")
+}
+```
+
+### Save LD file
+```{r, eval = FALSE}
+fwrite(ld_blocks, file.path(work_dir, "ld_blocks.txt"), sep = "\t")
+```
+
+### Save epigenomic files
+```{r, eval = FALSE}
+fwrite(exons, file.path(epi_dir, "Homo_sapiens.GRCh37.87_exon.bed"), sep = "\t")
+fwrite(epimap_tracks, file.path(epi_dir, "Epimap_tracks.tsv.gz"), sep = "\t")
+fwrite(bckg_epi, file.path(epi_dir, "bckg_epi.tsv.gz"), sep = "\t")
+fwrite(epimap_metadata, file.path(epi_dir, "Epimap_metadata.txt"), sep = "\t")
+fwrite(epimap_sampleID, file.path(epi_dir, "Epimap_sampleID.txt"), sep = "\t")
+```
+
+## **Run the Full Pipeline**
+
+### Step 1: Fine-map All Traits
+```{r, eval = FALSE}
+focal_trait <- "focal"
+aux_traits <- paste0("auxiliary_0", 1:5)
+
+for (trait in c(focal_trait, aux_traits)) {
+  finemap_to_sqlite(
+    trait = trait,
+    sumstat_file = file.path(sumstats_dir, glue("{trait}_sumstats.gz")),
+    ld_blocks = file.path(work_dir, "ld_blocks.txt"),
+    output_dir = output_dir,
+    pip_threshold = 0.01,
+    force = TRUE
+  )
+}
+```
+---
+
+

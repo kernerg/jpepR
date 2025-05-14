@@ -1,0 +1,137 @@
+---
+title: "jpepR-overview"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{jpepR-overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(jpepR)
+```
+
+Introduction
+
+jpepR provides an end-to-end framework for Joint Pleiotropic and Epigenomic Partitioning (J-PEP), a method for identifying biologically interpretable SNP clusters by jointly decomposing pleiotropic and tissue-specific epigenomic signals.
+
+This vignette walks through the full pipeline:
+
+    Fine-map GWAS traits to obtain PIPs
+
+    Construct the pleiotropic matrix V_trait
+
+    Construct the epigenomic matrix V_tissue
+
+    Intersect and align both matrices
+
+    Run the J-PEP decomposition
+
+    Save outputs for downstream interpretation
+
+Setup
+
+You need:
+
+    Summary statistics for the focal and auxiliary traits (in .sumstats.gz format)
+
+    A file defining LD blocks
+
+    Epigenomic annotations (EpiMap BEDs or user-supplied)
+
+    Output directory to save results
+
+focal_trait <- "PASS_T2D_Suzuki_EAS"
+aux_traits <- c("WHR_GIANT_2015", "TG_GWAS_2021")
+summary_stats_dir <- "/path/to/sumstats"
+ld_block_file <- "/path/to/ld_blocks.txt"
+output_dir <- "/path/to/output"
+epi_dir <- "default"  # or specify a custom directory
+
+
+1. Fine-mapping: Save PIPs to SQLite
+
+all_traits <- c(focal_trait, aux_traits)
+for (trait in all_traits) {
+  sumstat_file <- file.path(summary_stats_dir, paste0(trait, "_sumstats.gz"))
+  finemap_to_sqlite(trait, sumstat_file, ld_block_file, output_dir)
+}
+
+2. Construct V_trait matrix
+
+make_vtrait(
+  focal_trait = focal_trait,
+  aux_traits = aux_traits,
+  output_dir = output_dir
+)
+
+
+3. Construct V_tissue matrix
+
+make_vtissue(
+  focal_trait = focal_trait,
+  output_dir = output_dir,
+  epi_dir = epi_dir
+)
+
+
+4. Align V_trait and V_tissue
+
+vmats <- intersect_vmatrices(
+  focal_trait = focal_trait,
+  output_dir = output_dir
+)
+
+
+5. Run J-PEP
+
+results <- run_jpep_model(
+  V_trait = vmats$V_trait,
+  V_tissue = vmats$V_tissue,
+  k = 15,
+  NbrReps = 10,
+  Tolerance = 1e-7,
+  Alpha_proj = 10,
+  Alpha_cross = 0,
+  w_tis = 0.5
+)
+
+6. Save Results
+
+save_jpep_results(
+  consensus = results,
+  focal_trait = focal_trait,
+  output_dir = output_dir
+)
+
+
+Output Files
+
+The following outputs will be saved under output_dir/:
+
+    H_traits/: cluster × trait loadings
+
+    H_tissues/: cluster × tissue loadings
+
+    W/: SNP × cluster loadings
+
+You can now use these to interpret disease clusters, annotate SNPs, or compute cross-trait enrichment statistics.
+Questions?
+
+For help or bugs, open an issue on the GitHub repository.
+
+
+---
+
+Once you've pasted this into `vignettes/jpepR-overview.Rmd`, run:
+
+```r
+devtools::build_vignettes()
+
