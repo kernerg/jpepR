@@ -7,7 +7,6 @@
 #' @export
 make_vtissue <- function(focal_trait, output_dir, epi_dir = "default", pip_threshold = 0.01) {
 
-
   script <- system.file("scripts", "make_vtissue_refactored.R", package = "jpepR")
 
   cmd <- glue::glue(

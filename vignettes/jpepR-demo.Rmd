@@ -21,25 +21,36 @@ library(clue)
 The `jpepR` package implements the J-PEP (Joint Pleiotropic and Epigenomic Partitioning) method. It provides tools to:
 
 - Fine-map GWAS traits and store SNP-level posterior inclusion probabilities (PIPs)
-
 - Construct SNP-to-trait ($V_{\text{trait}}$) and SNP-to-tissue ($V_{\text{tissue}}$) matrices
-
 - Run a Bayesian non-negative matrix factorization to decompose SNPs into interpretable biological clusters
-
 - Output matrices of SNP ($W$), trait ($H_{\text{trait}}$), and tissue ($H_{\text{tissue}}$) loadings
 
 The pipeline is modular and includes the following key functions:
 
-| Function              |   Description                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------|
-| `finemap_to_sqlite()` |   Fine-maps one trait using P-values and LD blocks                                    |
-| `make_vtrait()`       |   Builds the $V_{\text{trait}}$ matrix from focal + auxiliary traits                  |
-| `make_vtissue()`      |   Builds the $V_{\text{tissue}}$ matrix from epigenomic tracks                        |
-| `intersect_vmatrices()` |   Intersects SNPs shared between $V_{\text{trait}}$ and $V_{\text{tissue}}$         |
-| `run_jpep_model()`    |   Runs the J-PEP matrix factorization                                                 |
-| `save_jpep_results()` |   Saves $W$, $H_{\text{trait}}$, and $H_{\text{tissue}}$ matrices to disk             |
+| Function                | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| `finemap_to_sqlite()`   | Fine-maps one trait using P-values and LD blocks                           |
+| `make_vtrait()`         | Builds the $V_{\text{trait}}$ matrix from focal + auxiliary traits          |
+| `make_vtissue()`        | Builds the $V_{\text{tissue}}$ matrix from epigenomic tracks                |
+| `intersect_vmatrices()` | Intersects SNPs shared between $V_{\text{trait}}$ and $V_{\text{tissue}}$   |
+| `run_jpep_model()`      | Runs the J-PEP matrix factorization                                          |
+| `save_jpep_results()`   | Saves $W$, $H_{\text{trait}}$, and $H_{\text{tissue}}$ matrices to disk     |
 
-## **Load and Prepare Example Data**
+## **About the Example Data**
+
+This vignette uses test datasets bundled with the package. These include:
+
+- `focal_sumstats`: summary statistics for one focal trait
+- `auxiliary_01` to `auxiliary_05`: summary statistics for five auxiliary traits
+- `ld_blocks`: LD blocks to use for fine-mapping
+- `exons`: genomic intervals of coding exons, used to exclude exonic SNPs
+- `epimap_tracks`: peak files for epigenomic annotations
+- `bckg_epi`: epigenomic overlap matrix for background (chr1 SNPs)
+- `epimap_metadata` and `epimap_sampleID`: used to map tracks to tissues
+
+These files are sufficient to run the full J-PEP workflow end-to-end.
+
+## **Step 0: Setup and Save Data Locally**
 
 ### Load bundled test data
 ```{r, eval = FALSE}
@@ -54,6 +65,7 @@ data(bckg_epi)
 data(epimap_metadata)
 data(epimap_sampleID)
 ```
+
 ### Set up working directories
 ```{r, eval = FALSE}
 work_dir <- file.path(tempdir(), "jpep_test")
@@ -65,8 +77,6 @@ dir.create(sumstats_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(epi_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(output_dir, recursive = TRUE)
 ```
-
-## **Save Summary Statistics and Support Files**
 
 ### Save summary statistics
 ```{r, eval = FALSE}
@@ -93,7 +103,8 @@ fwrite(epimap_sampleID, file.path(epi_dir, "Epimap_sampleID.txt"), sep = "\t")
 
 ## **Run the Full Pipeline**
 
-### Step 1: Fine-map All Traits
+### Step 1: Fine-map each trait
+This converts GWAS P-values to single-causal posterior inclusion probabilities using block-wise LD structure.
 ```{r, eval = FALSE}
 focal_trait <- "focal"
 aux_traits <- paste0("auxiliary_0", 1:5)
@@ -101,7 +112,7 @@ aux_traits <- paste0("auxiliary_0", 1:5)
 for (trait in c(focal_trait, aux_traits)) {
   finemap_to_sqlite(
     trait = trait,
-    sumstat_file = file.path(sumstats_dir, glue("{trait}_sumstats.gz")),
+    sumstat_file = file.path(sumstats_dir, paste0(trait, "_sumstats.gz")),
     ld_blocks = file.path(work_dir, "ld_blocks.txt"),
     output_dir = output_dir,
     pip_threshold = 0.01,
@@ -109,6 +120,70 @@ for (trait in c(focal_trait, aux_traits)) {
   )
 }
 ```
----
 
+### Step 2: Build V_trait
+This constructs the SNP-by-trait matrix encoding pleiotropic evidence across traits, aligned to the focal trait.
+```{r, eval = FALSE}
+make_vtrait(
+  focal_trait = focal_trait,
+  aux_traits = aux_traits,
+  output_dir = output_dir,
+  pip_threshold = 0.01,
+  aux_pip_thres = 0.5,
+  aux_nbr_thres = 1
+)
+```
 
+### Step 3: Build V_tissue
+This generates the SNP-by-tissue matrix by intersecting SNPs with epigenomic peaks and grouping tracks by tissue.
+```{r, eval = FALSE}
+make_vtissue(
+  focal_trait = focal_trait,
+  output_dir = output_dir,
+  epi_dir = "default",
+  pip_threshold = 0.01
+)
+```
+
+### Step 4: Intersect V_trait and V_tissue
+Keep only SNPs that are common to both V_trait and V_tissue matrices.
+```{r, eval = FALSE}
+vmats <- intersect_vmatrices(
+  focal_trait = focal_trait,
+  output_dir = output_dir,
+  pip_threshold = 0.01
+)
+```
+
+### Step 5: Run J-PEP
+This runs a Bayesian non-negative matrix factorization (bNMF) to discover interpretable clusters of SNPs.
+```{r, eval = FALSE}
+results <- run_jpep_model(
+  V_trait = vmats$V_trait,
+  V_tissue = vmats$V_tissue,
+  Tolerance = 1e-7,
+  k = 15,
+  NbrReps = 5,
+  Alpha_proj = 10,
+  Alpha_cross = 0,
+  w_tis = 0.5,
+  attempts = 5
+)
+```
+
+### Step 6: Save Output Matrices
+This step writes the $W$, $H_{\text{trait}}$, and $H_{\text{tissue}}$ matrices to disk.
+```{r, eval = FALSE}
+final_result <- concensus_run(
+  runs = results,
+  V_trait = vmats$V_trait,
+  V_tissue = vmats$V_tissue
+)
+
+save_jpep_results(
+  result = final_result,
+  output_dir = output_dir,
+  focal_trait = focal_trait,
+  pip_threshold = 0.01
+)
+```

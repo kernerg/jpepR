@@ -10,6 +10,9 @@
 #' @param w_tis Weight on tissue component
 #' @export
 run_jpep_model <- function(V_trait, V_tissue, Tolerance = 1e-7, k = 15, NbrReps = 10, Alpha_proj = 10, Alpha_cross = 0, w_tis = 0.5, attempts = 30) {
+  suppressPackageStartupMessages({
+    library(igraph)
+  })
   source(system.file("scripts", "bNMF_functions.R", package = "jpepR"))
   run_single_bNMF_model("JPEP", V_trait, V_tissue, Tolerance, k, NbrReps, Alpha_proj, Alpha_cross, w_tis, attempts)
 }
