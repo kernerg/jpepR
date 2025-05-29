@@ -1,0 +1,23 @@
+Package: jpepR
+Title: Joint Pleiotropic and Epigenomic Partitioning (J-PEP)
+Description: Modular tools to fine-map GWAS traits, build pleiotropic and tissue matrices, and run J-PEP to identify biological clusters.
+Version: 0.0.1
+Authors@R: person("Gaspard", "Kerner", email = "gkerner@hsph.harvard.edu", role = c("aut", "cre"))
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    clue,
+    data.table,
+    DBI,
+    glue,
+    igraph,
+    Rmpfr,
+    RSQLite
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+LazyData: true
+License: MIT + file LICENSE
