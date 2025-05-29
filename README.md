@@ -81,6 +81,7 @@ output_dir <- file.path(tempdir(), "jpep_test_output")
 make_vtrait(trait, NULL, output_dir, fine_mapped_files = focal_loc,
             full_matrix_path = "data-raw/big_pleio_matrix.tsv.gz",
             subset = subset_aux)
+(⚠️ **make_vtissue** may take a few minutes to run)
 make_vtissue(trait, output_dir, epi_dir = "default")
 vmats <- intersect_vmatrices(trait, output_dir)
 
