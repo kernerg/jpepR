@@ -4,6 +4,7 @@
 **jpepR** implements the *Joint Pleiotropic and Epigenomic Partitioning* (J-PEP) method, a framework for identifying interpretable SNP clusters that jointly reflect trait-specific pleiotropy and tissue-specific epigenomic enrichment.
 
 > ⚠️ **THIS SITE IS UNDER CONSTRUCTION. PLEASE BE PATIENT UNTIL A STABLE VERSION OF THE SOFTWARE IS AVAILABLE.**
+
 > 🚧 **In the meantime, feel free to try it — the example data and pipeline should run smoothly!**
 
 ---
