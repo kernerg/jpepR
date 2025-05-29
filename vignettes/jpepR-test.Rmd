@@ -178,7 +178,12 @@ runs <- run_jpep_model(
 We summarize the output and extract the consensus `H_trait` and `H_tissue` matrices. Consensus is determined by running the model `NbrReps` times and selecting the solution with the highest average projection correlation among those with the most consistently identified number of clusters. In the case of ties, the solution with the smallest number of clusters is chosen.
 
 ```r
-concensus_run <- process_results(model_name = "JPEP", runs, V_trait, V_tissue)
+results <- concensus_run(
+  model_name = "JPEP",
+  runs,
+  V_trait,
+  V_tissue
+)
 ```
 
 ## Step 6: Plot Trait and Tissue Profiles
