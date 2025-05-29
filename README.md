@@ -77,7 +77,7 @@ focal_loc <- list(T2D = "data-raw/T2D_postfinemap.tsv")
 load("data-raw/T2D_auxtraits.rda")  # loads 'subset_aux'
 output_dir <- file.path(tempdir(), "jpep_test_output")
 
-# Construct V matrices (⚠️ **make_vtissue** may take a few minutes to run)
+# Construct V matrices (⚠️ running time of make_vtissue may add up to few minutes)
 make_vtrait(trait, NULL, output_dir, fine_mapped_files = focal_loc,
             full_matrix_path = "data-raw/big_pleio_matrix.tsv.gz",
             subset = subset_aux)
