@@ -55,6 +55,50 @@ This vignette walks through the full J-PEP workflow using example data, from fin
 
 ---
 
+## 🚀 Quick Test Run (Minimal Example)
+
+This **minimal test** downloads example data and runs J-PEP from start to finish.  
+For a complete walkthrough, see the full vignette (`vignettes/jpepR-test.Rmd`).
+
+```r
+# Load jpepR
+library(jpepR)
+
+# Set up a working directory
+setwd("/n/groups/price/gaspard/jpepR_clean_env")
+dir.create("data-raw", showWarnings = FALSE)
+
+# Download example test data (~300MB)
+jpepR::download_test_data(dest_dir = "data-raw")
+
+# Define inputs
+trait <- "T2D"
+focal_loc <- list(T2D = "data-raw/T2D_postfinemap.tsv")
+load("data-raw/T2D_auxtraits.rda")  # loads 'subset_aux'
+output_dir <- file.path(tempdir(), "jpep_test_output")
+
+# Construct V matrices
+make_vtrait(trait, NULL, output_dir, fine_mapped_files = focal_loc,
+            full_matrix_path = "data-raw/big_pleio_matrix.tsv.gz",
+            subset = subset_aux)
+make_vtissue(trait, output_dir, epi_dir = "default")
+vmats <- intersect_vmatrices(trait, output_dir)
+
+# Run J-PEP model
+runs <- run_jpep_model("JPEP", vmats$V_trait, vmats$V_tissue,
+                       Tolerance = 1e-7, k = 15, NbrReps = 10, attempts = 5)
+
+# Process results
+results <- concensus_run("JPEP", runs, vmats$V_trait, vmats$V_tissue)
+
+# Retrieve matrices
+W <- results$W
+H_trait <- results$H_trait
+H_tissue <- results$H_tissue
+```
+
+---
+
 ## 📄 License
 
 This package is released under the **MIT License**.  
