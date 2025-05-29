@@ -179,7 +179,7 @@ We summarize the output and extract the consensus `H_trait` and `H_tissue` matri
 
 ```r
 results <- concensus_run(
-  model_name = "JPEP",
+  "JPEP",
   runs,
   V_trait,
   V_tissue
