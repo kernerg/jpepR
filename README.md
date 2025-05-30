@@ -131,7 +131,7 @@ To run J-PEP on a trait of your choice, simply adjust the inputs shown in the **
 
 - **Trait name**  
   Replace `"T2D"` with your desired trait name in `trait`.
-  Replace `"T2D"` with your desired trait name in `trait_loc`'s list name.
+  Replace `"T2D"` with your desired trait name in `trait_loc` list's name.
 
 - **Fine-mapped summary statistics**  
   Update `trait_loc` to point to your fine-mapped file (TSV or similar), which must contain the following columns:
