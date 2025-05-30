@@ -57,7 +57,7 @@ This vignette walks through the full J-PEP workflow using example data, from fin
 
 ---
 
-## 🚀 Quick Test Run (Not so quick though)
+## 🚀 Quick Test Run (Not so quick though, ~5 min)
 
 This **minimal test** downloads example data and runs J-PEP from start to finish.  
 For a complete walkthrough, see the full vignette (`vignettes/jpepR-test.Rmd`).
