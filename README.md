@@ -73,9 +73,9 @@ dir.create("data-raw", showWarnings = FALSE)
 # Download example test data (~900MB)
 jpepR::download_test_data(dest_dir = "data-raw")
 
-# Define inputs
+# Define inputs (T2D Fine-map [single-causal] from Smith et al. 2024 Nat Med)
 trait             <- "T2D"
-trait_loc         <- list(T2D = "data-raw/T2D_postfinemap.tsv") # Fine-map (single-causal) from Smith et al. 2024 Nat Med
+trait_loc         <- list(T2D = "data-raw/T2D_postfinemap.tsv")
 aux_trait_mat_loc <- "data-raw/big_pleio_matrix.tsv.gz"
 output_dir        <- file.path(tempdir(), "jpep_test_output")
 load("data-raw/T2D_auxtraits.rda")  # loads default auxiliary trait subset for T2D
