@@ -70,7 +70,7 @@ library(jpepR)
 setwd("/path/to/your/folder/jpepR_clean_env")
 dir.create("data-raw", showWarnings = FALSE)
 
-# Download example test data (~300MB)
+# Download example test data (~900MB)
 jpepR::download_test_data(dest_dir = "data-raw")
 
 # Define inputs
