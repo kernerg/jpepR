@@ -67,7 +67,7 @@ For a complete walkthrough, see the full vignette (`vignettes/jpepR-test.Rmd`).
 library(jpepR)
 
 # Set up a working directory
-setwd("/n/groups/price/gaspard/jpepR_clean_env")
+setwd("/path/to/your/folder/jpepR_clean_env")
 dir.create("data-raw", showWarnings = FALSE)
 
 # Download example test data (~300MB)
