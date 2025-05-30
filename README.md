@@ -148,7 +148,7 @@ To run J-PEP on a trait of your choice, simply adjust the inputs shown in the **
   If not specified, J-PEP will use a default matrix of ~1 million SNPs × 164 traits, fine-mapped under a *single causal variant* model.
 
 - **Subset of auxiliary traits** *(optional)*  
-  You can restrict analysis to a subset of traits by passing a character vector `subset_aux`, listing preferred auxiliary traits from the full matrix (check column names of **Auxiliary trait matrix**).
+  You can restrict analysis to a subset of traits by passing a character vector `subset_aux`, listing preferred auxiliary traits from the full matrix (check column names of **Auxiliary trait matrix**). Note: In our analysis, auxiliary traits are selected to have genetic correlation (rg) less than 0.5 with the focal trait.
 
 > 🔍 For a complete example, refer to the vignette:  
 > [`vignettes/jpepR-test.Rmd`](vignettes/jpepR-test.Rmd)
