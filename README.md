@@ -74,26 +74,50 @@ dir.create("data-raw", showWarnings = FALSE)
 jpepR::download_test_data(dest_dir = "data-raw")
 
 # Define inputs
-trait <- "T2D"
-focal_loc <- list(T2D = "data-raw/T2D_postfinemap.tsv")
-load("data-raw/T2D_auxtraits.rda")  # loads 'subset_aux'
-output_dir <- file.path(tempdir(), "jpep_test_output")
+trait         <- "T2D"
+focal_loc     <- list(T2D = "data-raw/T2D_postfinemap.tsv")
+pleio_mat_loc <- "data-raw/big_pleio_matrix.tsv.gz"
+output_dir    <- file.path(tempdir(), "jpep_test_output")
+load("data-raw/T2D_auxtraits.rda")  # loads default auxiliary trait subset for T2D
 
-# Construct V matrices (⚠️ running time of make_vtissue may add up to few minutes)
-make_vtrait(trait, NULL, output_dir, fine_mapped_files = focal_loc,
-            full_matrix_path = "data-raw/big_pleio_matrix.tsv.gz",
-            subset = subset_aux)
-make_vtissue(trait, output_dir, epi_dir = "default")
+# Build V matrices (⚠️ make_vtissue may take a few minutes)
+make_vtrait(
+  trait,
+  NULL,
+  output_dir,
+  fine_mapped_files = focal_loc,
+  full_matrix_path = pleio_mat_loc,
+  subset = subset_aux
+)
+make_vtissue(
+  trait,
+  output_dir,
+  epi_dir = "default"
+)
+
+# Aligns SNPs in V_trait and V_tissue
 vmats <- intersect_vmatrices(trait, output_dir)
 
-# Run J-PEP model (replace "JPEP" by "Pleiotropic" or "Epigenomic" to run pleiotropic or epigenomic partitioning)
-runs <- run_jpep_model("JPEP", vmats$V_trait, vmats$V_tissue,
-                       Tolerance = 1e-7, k = 15, NbrReps = 10, attempts = 5)
+# Run J-PEP (👀 use "Pleiotropic" or "Epigenomic" for other models)
+runs <- run_jpep_model(
+  "JPEP",
+  vmats$V_trait,
+  vmats$V_tissue,
+  Tolerance = 1e-7,
+  k = 15,
+  NbrReps = 10,
+  attempts = 5
+)
 
 # Process results
-results <- concensus_run("JPEP", runs, vmats$V_trait, vmats$V_tissue)
+results <- concensus_run(
+  "JPEP",
+  runs,
+  vmats$V_trait,
+  vmats$V_tissue
+)
 
-# Retrieve matrices
+# Retrieve W and H matrices
 W <- results$W
 H_trait <- results$H_trait
 H_tissue <- results$H_tissue
