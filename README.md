@@ -75,7 +75,7 @@ jpepR::download_test_data(dest_dir = "data-raw")
 
 # Define inputs
 trait             <- "T2D"
-trait_loc         <- list(T2D = "data-raw/T2D_postfinemap.tsv") # Single-causal variant fine-mapping on summ stats from Smith et al. 2024 $Nat$ $Med$
+trait_loc         <- list(T2D = "data-raw/T2D_postfinemap.tsv") # Fine-map (single-causal) from Smith et al. 2024 Nat Med
 aux_trait_mat_loc <- "data-raw/big_pleio_matrix.tsv.gz"
 output_dir        <- file.path(tempdir(), "jpep_test_output")
 load("data-raw/T2D_auxtraits.rda")  # loads default auxiliary trait subset for T2D
