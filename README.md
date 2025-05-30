@@ -130,7 +130,8 @@ H_tissue <- results$H_tissue
 To run J-PEP on a trait of your choice, simply adjust the inputs shown in the **🚀 Quick Test Run** section:
 
 - **Trait name**  
-  Replace `"T2D"` with your desired trait name.
+  Replace `"T2D"` with your desired trait name in `trait`.
+  Replace `"T2D"` with your desired trait name in `trait_loc`'s list name.
 
 - **Fine-mapped summary statistics**  
   Update `trait_loc` to point to your fine-mapped file (TSV or similar), which must contain the following columns:
@@ -147,7 +148,7 @@ To run J-PEP on a trait of your choice, simply adjust the inputs shown in the **
   If not specified, J-PEP will use a default matrix of ~1 million SNPs × 164 traits, fine-mapped under a *single causal variant* model.
 
 - **Subset of auxiliary traits** *(optional)*  
-  You can restrict analysis to a subset of traits by passing a character vector `subset_aux`, listing preferred auxiliary traits from the full matrix.
+  You can restrict analysis to a subset of traits by passing a character vector `subset_aux`, listing preferred auxiliary traits from the full matrix (check column names of **Auxiliary trait matrix**).
 
 > 🔍 For a complete example, refer to the vignette:  
 > [`vignettes/jpepR-test.Rmd`](vignettes/jpepR-test.Rmd)
