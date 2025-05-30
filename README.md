@@ -86,7 +86,7 @@ make_vtrait(trait, NULL, output_dir, fine_mapped_files = focal_loc,
 make_vtissue(trait, output_dir, epi_dir = "default")
 vmats <- intersect_vmatrices(trait, output_dir)
 
-# Run J-PEP model
+# Run J-PEP model (replace "JPEP" by "Pleiotropic" or "Epigenomic" to run pleiotropic or epigenomic partitioning)
 runs <- run_jpep_model("JPEP", vmats$V_trait, vmats$V_tissue,
                        Tolerance = 1e-7, k = 15, NbrReps = 10, attempts = 5)
 
