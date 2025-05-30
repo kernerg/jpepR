@@ -74,10 +74,10 @@ dir.create("data-raw", showWarnings = FALSE)
 jpepR::download_test_data(dest_dir = "data-raw")
 
 # Define inputs
-trait         <- "T2D"
-focal_loc     <- list(T2D = "data-raw/T2D_postfinemap.tsv")
-pleio_mat_loc <- "data-raw/big_pleio_matrix.tsv.gz"
-output_dir    <- file.path(tempdir(), "jpep_test_output")
+trait             <- "T2D"
+trait_loc         <- list(T2D = "data-raw/T2D_postfinemap.tsv") # Single-causal variant fine-mapping on summ stats from Smith et al. 2024 $Nat$ $Med$
+aux_trait_mat_loc <- "data-raw/big_pleio_matrix.tsv.gz"
+output_dir        <- file.path(tempdir(), "jpep_test_output")
 load("data-raw/T2D_auxtraits.rda")  # loads default auxiliary trait subset for T2D
 
 # Build V matrices (⚠️ make_vtissue may take a few minutes)
@@ -85,8 +85,8 @@ make_vtrait(
   trait,
   NULL,
   output_dir,
-  fine_mapped_files = focal_loc,
-  full_matrix_path = pleio_mat_loc,
+  fine_mapped_files = trait_loc,
+  full_matrix_path = aux_trait_mat_loc,
   subset = subset_aux
 )
 make_vtissue(
