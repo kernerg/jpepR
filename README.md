@@ -57,7 +57,7 @@ This vignette walks through the full J-PEP workflow using example data, from fin
 
 ---
 
-## 🚀 Quick Test Run (Minimal Example)
+## 🚀 Quick Test Run (Not so quick though)
 
 This **minimal test** downloads example data and runs J-PEP from start to finish.  
 For a complete walkthrough, see the full vignette (`vignettes/jpepR-test.Rmd`).
@@ -122,6 +122,35 @@ W <- results$W
 H_trait <- results$H_trait
 H_tissue <- results$H_tissue
 ```
+
+---
+
+## 🧬 How to Run J-PEP on Your Own Trait
+
+To run J-PEP on a trait of your choice, simply adjust the inputs shown in the **🚀 Quick Test Run** section:
+
+- **Trait name**  
+  Replace `"T2D"` with your desired trait name.
+
+- **Fine-mapped summary statistics**  
+  Update `trait_loc` to point to your fine-mapped file (TSV or similar), which must contain the following columns:
+
+  | CHR | BP | RSID | A1 | A2 | BETA | PIP |
+  |-----|----|------|----|----|------|-----|
+  | 1–22 | hg19 position | SNP ID | Effect allele | Non-effect allele | Effect size for A1 | Posterior inclusion probability |
+
+- **SNP matching**  
+  By default, SNPs are matched using the `RSID` column.
+  Make sure RSIDs in your focal trait file are consistent with those used in the auxiliary trait matrix.
+
+- **Auxiliary trait matrix**  
+  If not specified, J-PEP will use a default matrix of ~1 million SNPs × 164 traits, fine-mapped under a *single causal variant* model.
+
+- **Subset of auxiliary traits** *(optional)*  
+  You can restrict analysis to a subset of traits by passing a character vector `subset_aux`, listing preferred auxiliary traits from the full matrix.
+
+> 🔍 For a complete example, refer to the vignette:  
+> [`vignettes/jpepR-test.Rmd`](vignettes/jpepR-test.Rmd)
 
 ---
 
